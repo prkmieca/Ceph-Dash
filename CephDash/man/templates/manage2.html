@@ -1,0 +1,1512 @@
+{% load staticfiles %}
+{% load filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "/css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "/css/CephDashStyle.css" %}" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <script src="{% static "js/jquery-3.3.1.min.js" %}"></script>
+    <script src="{% static "/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "/js/CephDashScript.js" %}"></script>
+    <script src="{% static "/js/crushScript.js" %}"></script>
+    <script src="{% static "/js/pools.js" %}"></script>
+
+
+</head>
+
+<body>
+  <!-- NAVBAR BEGIN -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">CLUSTER MANAGER</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="/dash">Status</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href={% url 'log_out'%}>Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- NAVBAR END -->
+
+
+<div class="container-fluid">
+  <div class="row">
+  <div class="col-2">
+    <!-- MENU -->
+    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+       <a 
+  {% if flag.name == 'cluster' %} 
+ class="nav-link  {{ flag.class1}}"
+  {% else %}
+  class="nav-link"
+  {%endif%}
+   id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Cluster</a>
+  <a 
+  {% if flag.name == 'osds' %} 
+  class="nav-link  {{ flag.class1}}"
+  {% else %}
+  class="nav-link"
+  {%endif%}
+  id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">OSDs</a>
+
+<a 
+  {% if flag.name == 'pools' %} 
+  class="nav-link  {{ flag.class1}}" 
+      {% else %}
+      class="nav-link"
+      {%endif%}
+  id="v-pills-messages-tab" data-toggle="pill" href="#pools" role="tab" aria-controls="v-pills-messages" aria-selected="false">Pools</a>
+
+  <a 
+  {% if flag.name == 'erasure' %} 
+  class="nav-link  {{ flag.class1}}" 
+      {% else %}
+      class="nav-link"
+      {%endif%}
+  id="v-pills-erasure-tab" data-toggle="pill" href="#era" role="tab" aria-controls="v-pills-erasure-tab" aria-selected="false">Erasure code profiles</a>
+
+  <a 
+  {% if flag.name == 'crush' %} 
+  class="nav-link  {{ flag.class1}}" 
+      {% else %}
+      class="nav-link"
+      {%endif%}
+  id="v-pills-crush-tab" data-toggle="pill" href="#crush" role="tab" aria-controls="v-pills-crush-tab" aria-selected="false">CRUSH Map</a>
+
+
+
+</div>
+  </div>
+  <div class="col-10">
+  <div class="tab-content" id="v-pills-tabContent">
+  <!-- CLUSTER SETTINGS -->
+
+   <div
+  {% if flag.name == 'cluster' %} 
+  class="tab-pane {{ flag.class1}} {{flag.class2}}"
+    {% else %} 
+    class="tab-pane fade" 
+  {%endif%}
+  id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+     <!-- CLUSTER SETTINGS CONTENT -->
+
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="hosts-tab" data-toggle="tab" href="#hosts" role="tab" aria-controls="hosts" aria-selected="true">HOSTS</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="cluster-tab" data-toggle="tab" href="#cluster" role="tab" aria-controls="cluster" aria-selected="false">CLUSTER SETTINGS</a>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="hosts" role="tabpanel" aria-labelledby="home-tab">
+      <!-- CLUSTER HOSTS SETTINGS  -->
+
+  <div class="row">
+    <div class="col">
+      <h2>Monitors:</h2>
+      {% for mon in cluster.output.monmap.mons %}
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal{{mon.name}}">{{mon.name}}</button>
+
+  
+
+<!-- Button trigger modal -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal{{mon.name}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{mon.name}}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{mon.name}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% for key, value in mon.items %}
+        <p><b>{{key}}:</b> {{value}}</p>
+        {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+      {% endfor %}
+  </div>
+
+
+
+    <div class="col">
+      <h2>OSD Hosts:</h2>
+      {% for osd in osds_list.output %}
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal{{osd}}">{{osd}}</button>
+
+  
+
+<!-- Button trigger modal -->
+<div class="modal fade" id="exampleModal{{osd}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{osd}}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{osd}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+                <!-- LIST OF NODE OSDS  -->
+                {% for osd_meta in cluster.output.osd_metadata %}
+                {% if osd_meta.hostname == osd %}
+                  <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseMeta{{osd_meta.id}}" aria-expanded="false" style="margin: 10px" aria-controls="collapseMeta{{osd_meta.id}}">{{osd_meta.id}}</button><br/>
+
+                  <div class="collapse" id="collapseMeta{{osd_meta.id}}">
+                   <div class="card card-body">
+                    {% for key, value in osd_meta.items %}
+                    <p><b>{{key}}:</b> {{value}}</p>
+                    {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
+                {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+      {% endfor %}
+    </div>
+  </div>
+
+  </div>
+  <div class="tab-pane fade" id="cluster" role="tabpanel" aria-labelledby="profile-tab">
+      <!-- CLUSTER CLUSTER SETTINGS  -->
+        <div class="row">
+    <div class="col">
+
+    </div>
+    <div class="col">
+          <form action={% url 'osdSettings' %} method="POST">
+                 {% csrf_token %}
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check' value="pause" id="checkPause"
+                 {% if 'pause' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkPause">
+            Pause
+          </label>
+          </div>
+
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check'  value="noup" id="checkNoup"
+                {% if 'noup' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNoup">
+            No  Up
+          </label>
+          </div>
+
+           <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check'  value="nodown" id="checkNodown"
+                {% if 'nodown' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNodown">
+            No  Down
+          </label>
+          </div>
+
+
+           <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check' value="noout" id="checkNoout"
+            {% if 'noout' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNoout">
+            No  Out
+          </label>
+          </div>
+
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check' value="noin" id="checkNoin"
+             {% if 'noin' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNoin">
+            No  In
+          </label>
+          </div>
+
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check' value="nobackfill" id="checkNobackfill"
+             {% if 'nobackfill' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNobackfill">
+            No  Backfill
+          </label>
+          </div>
+
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check' value="norecover" id="checkNorecover"
+              {% if 'norecover' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNorecover">
+            No  Recover
+          </label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check' value="noscrub" id="checkNoscrub"
+               {% if 'noscrub' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNoscrub">
+            No  Scrub
+          </label>
+          </div>
+
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" name='check' value="nodeep-scrub" id="checkNodeepscrub"
+                 {% if 'nodeep-scrub' in OSDflags %}
+            checked
+            {% else %}
+            {% endif %} 
+            >
+            <label class="form-check-label" for="checkNodeepscrub">
+            No  Deep Scrub
+          </label>
+          </div>
+
+          <br/>
+            <button class="btn btn-primary" type="submit">Submit</button>
+          </form>
+    </div>
+  </div>
+  </div>
+
+</div>
+   <!-- END CLUSTER SETTINGS CONTENT -->
+  </div>
+  <!-- END CLUSTER SETTINGS -->
+  <!-- OSDS SETTINGS  -->
+  <div 
+  {% if flag.name == 'osds' %} 
+  class="tab-pane {{ flag.class1}} {{flag.class2}}" 
+   {% else %}
+   class="tab-pane fade"
+    {%endif%}
+  id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+
+<div id="accordion">
+
+  {% for key, value in osds_list.output.items %}
+
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h5 class="mb-0">
+    
+        <button 
+         {% if osd_flag.hostname == key %} 
+        class="btn btn-link" 
+         {% else %}
+         class="btn btn-link collapsed" 
+          {%endif%}
+        data-toggle="collapse" data-target="#collapse{{ key }}" aria-expanded="true" aria-controls="collapse{{ key }}">
+          {{ key }}
+        </button>
+      </h5>
+    </div>
+     
+    <div id="collapse{{ key }}" 
+    {% if osd_flag.hostname == key %} 
+    class="collapse show" 
+    {% else %}
+    class="collapse" 
+    {%endif%}
+    aria-labelledby="heading{{ key}}" data-parent="#accordion">
+      <div class="card-body">
+
+   {% for osds in value %}
+
+            <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">STATE</th>
+      <th scope="col">WEIGHT</th>
+      <th scope="col">COMMANDS</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+
+   {% for osd_det in cluster.output.osdmap.osds %}
+
+      {% if osds == osd_det.osd %}
+     <th scope="row">{{osd_det.osd}}</th>
+      <td>
+      {% if osd_det.up == 1 %}
+      UP 
+      {% else %} 
+      DOWN
+      {%endif%}
+      /
+      {% if osd_det.in == 1 %}
+      IN 
+      {% else %} 
+      OUT
+      {%endif%}
+      </td>
+      <td>{{ osd_det.weight|round}}</td>
+
+      <td>
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#editweightModal{{osd_det.osd}}">RE-WEIGHT</button>
+          <a href={% url 'osdRepair' osd_det.osd key %} class="btn btn-secondary" role="button">REPAIR</a>
+          <a href={% url 'osdIn' osd_det.osd key %} class="btn btn-secondary" role="button">IN</a>
+          <a href={% url 'osdOut' osd_det.osd key %} class="btn btn-secondary" role="button">OUT</a>
+          <a href={% url 'osdDown' osd_det.osd key %} class="btn btn-secondary" role="button">DOWN</a>
+        </div>
+      </td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+    <div class="modal fade" id="editweightModal{{osd_det.osd}}" tabindex="-1" role="dialog" aria-labelledby="editweightModal{{osd_det.osd}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">RE-WEIGHT</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <form method="post" action={% url 'reweight' osd_det.osd key %}>
+          {% csrf_token %}
+        <h5>{{osd_det.osd}}</h5>
+               <div class="form-group">
+            <label for="weight">Weight</label>
+            <input type="number" class="form-control" id="weight" name="weight"  value={{ osd_det.weight|round }} step="0.1" min="0.0" max="1.0">
+            </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+        {% endif %}
+
+        {%endfor %}
+
+
+         {%endfor %}
+      </div>
+    </div>
+  </div>
+   {% endfor %}
+</div>
+  </div>
+    <!-- END OSDS SETTINGS  -->
+  <!-- POOLS SETTINGS  -->
+  <div 
+   {% if flag.name == 'pools' %} 
+  class="tab-pane {{ flag.class1}} {{flag.class2}}" 
+  {% else %}
+  class="tab-pane fade"
+    {%endif%}
+   id="pools" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+    <div class="row">
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Pool name</th>
+      <th scope="col">Size</th>
+      <th scope="col">Placement groups</th>
+      <th scope="col">Commands</th>
+    </tr>
+  </thead>
+  <tbody>
+   {% for pool in cluster.output.osdmap.pools %}
+    <tr>
+      <td><a href="#" class="nav-link" data-toggle="modal" data-target="#listSnapModal{{pool.pool_name}}">{{pool.pool_name}}
+
+      </a>
+<!-- LIST/DEL SNAPSHOT MODAL-->
+
+<!-- Modal -->
+<div class="modal fade" id="listSnapModal{{pool.pool_name}}" tabindex="-1" role="dialog" aria-labelledby="listSnapModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="listSnapModalLabel{{pool.pool_name}}">Snapshots</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action={% url 'removeSnap' pool.pool_name %} method="POST">
+          {% csrf_token %}
+        <!-- LIST SNAP --> 
+        {% if not pool.pool_snaps %} 
+         <h5>Pools has no snapshots.</h5>
+          {% else %}
+          <div>
+         <table class="table">
+        <thead>
+          <tr>
+          <th scope="col">ID</th>
+          <th scope="col">NAME</th>
+          <th scope="col">REMOVE</th>
+          </tr>
+        </thead>
+      <tbody>
+        {% for snap in pool.pool_snaps %}
+        <tr>
+        <th scope="row">{{snap.snapid}}</th>
+        <td>{{snap.name}}</td>
+        <td>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name='checkDelSnap' value="{{ snap.name }}" id="checkDelSnap{{ snap.snapid }}">
+            </div>
+        </td>
+        </tr>
+       {% endfor %}
+      </tbody>
+      </table>
+      </div>
+       {%endif%}
+        <!-- END LIST SNAP -->
+      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+          </form>
+      </div>
+    </div>
+  </div>
+</div>
+    </td>
+      <td>{{pool.size}}</td>
+      <td>{{pool.pg_num}}</td>
+       <!-- EDIT &B  DEL POOL  BTN -->
+      <td>
+        <div class="btn-group" role="group" aria-label="Basic example">
+    
+ 
+          <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#editPoolModal{{pool.pool_name}}">EDIT</button>
+          <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#snapPoolModal{{pool.pool_name}}">SNAPSHOT</button>
+          <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#quotaPoolModal{{pool.pool_name}}">QUOTA</button>
+          <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#delPoolModal{{pool.pool_name}}">DELETE</button>
+        </div>
+      </td>
+    </tr>
+<!-- ADD SNAPSHOT MODAL-->
+<div class="modal fade" id="snapPoolModal{{pool.pool_name}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add pool snapshot</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action={% url 'makeSnap' pool.pool_name  %}>
+           {% csrf_token %}
+             <div class="form-group">
+            <label for="var">Snapshot name</label>
+            <input type="text" class="form-control" id="var1" name="var1"  value="">
+            </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- QUOTA POOL MODAL-->
+<div class="modal fade" id="quotaPoolModal{{pool.pool_name}}" tabindex="-1" role="dialog" aria-labelledby="quotaPoolModal{{pool.pool_name}}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="quotaPoolModal{{pool.pool_name}}">Set quota for {{ pool.pool_name}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form method="post" action={% url 'setQuota' pool.pool_name  %}>
+             {% csrf_token %}
+              <div class="form-group">
+            <label for="var">Max objects </label>
+            <input type="number" class="form-control" id="var1" name="var1"  value={{ pool.quota_max_objects }} min="0">
+            </div>
+                       <div class="form-group">
+            <label for="var">Max bytes</label>
+            <input type="number" class="form-control" id="var2" name="var2"  value={{ pool.quota_max_bytes }} min="0">
+            </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- EDIT POOL MODAL-->
+<div class="modal fade" id="editPoolModal{{pool.pool_name}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edit pool</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action={% url 'editPool' pool.pool_name pool.type %}>
+             {% csrf_token %}
+            <div class="form-group">
+            <label for="var">Pool name</label>
+            <input type="text" class="form-control" id="var1" name="var1"  value={{ pool.pool_name }}>
+            </div>
+
+            {% if pool.type == 1 %}
+            <div class="form-group">
+            <label for="var">Pool size</label>
+            <input type="number" class="form-control" id="var2" name="var2"  value={{ pool.size }}>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+            <label for="var">Pool PGs</label>
+            <input type="number" class="form-control" id="var2" name="var3"  value={{ pool.pg_num}} min={{ pool.pg_num }}>
+            </div>
+    
+             <div class="form-group" 
+              {% if pool.type == 1 %}
+             id="group-replicated-pool-rule">
+             {% else %}
+              id="group-erasure-pool-rule">
+              {% endif %}
+              <label for="exampleFormControlSelect1">Select crush rule</label>
+            <select class="form-control" id="exampleFormControlSelect2" 
+            {% if pool.type == 1 %}
+            name="rulesRep">
+            {% else %}
+            name="rulesEra">
+            {% endif %}
+
+           
+              {% for rule in cluster.output.crushmap.rules %}
+              {% if pool.type == rule.type %}
+              <option
+          
+              {% if pool.crush_ruleset == rule.ruleset %}
+              selected="selected" 
+              {% endif %}
+
+              value="{{rule.ruleset}}">{{rule.rule_name}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+            </div>
+
+    
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- DEL POOL MODAL-->
+<div class="modal fade" id="delPoolModal{{pool.pool_name}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Del pool</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h6>Are you sure you want to delete {{pool.pool_name}}?</h6>
+  
+ 
+
+      </div>
+      <div class="modal-footer">
+        <form action={% url 'delPool' pool.pool_name %} method="POST">
+           {% csrf_token %}
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+  </tbody>
+
+</table>
+</div>
+  <!-- ADD NEW POOL  -->
+ <div class="row">
+  <!-- ADD POOL BTN-->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addPoolModal">
+  Add New Pool
+</button>
+
+<!-- ADD POOL MODAL -->
+<div class="modal fade" id="addPoolModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add pool</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- form -->
+        <form method="post" action="{% url 'addPool' %}">
+              {% csrf_token %}
+              <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="replicated" value="replicated" checked="checked" onClick="enableReplicated()">
+               <label class="form-check-label" for="inlineRadio1">replicated</label>
+            </div>
+            <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="erasure" value="erasure" onClick="enableErasured()">
+            <label class="form-check-label" for="inlineRadio2">erasured</label>
+              </div>
+              <div class="form-group">
+            <label for="var">Pool Name</label>
+            <input type="text" class="form-control" id="name" name="name" >
+            </div>
+            <div class="form-group" id="poolSize">
+            <label for="var">Pool Size</label>
+            <input type="number" class="form-control" id="size" name="size">
+            </div>
+            <div class="form-group">
+            <label for="var">Pool Placement Groups</label>
+            <input type="number" class="form-control" id="pg_num" name="pg_num">
+            </div>
+
+
+            <div class="form-group" id="group-replicated-pool-rule1">
+              <label for="exampleFormControlSelect1">Select crush rule</label>
+            <select class="form-control" id="exampleFormControlSelect2" name="rulesRep">
+
+              {% for rule in cluster.output.crushmap.rules %}
+              {% if rule.type == 1 %}
+              <option value="{{rule.rule_name}}">{{rule.rule_name}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+            </div>
+
+             <div class="form-group" id="group-erasure-pool-rule" hidden="">
+              <label for="exampleFormControlSelect1">Select crush rule</label>
+            <select class="form-control" id="exampleFormControlSelect2" name="rulesEra">
+
+              {% for rule in cluster.output.crushmap.rules %}
+              {% if rule.type == 3 %}
+              <option value="{{rule.rule_name}}">{{rule.rule_name}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+            </div>
+
+            <div class="form-group" id="group-erasure-pool-code-profile" hidden="">
+              <label for="exampleFormControlSelect1">Select code profile</label>
+            <select class="form-control" id="exampleFormControlSelect2" name="code_profiles">
+
+              {% for code_profile in cluster.output.osdmap.erasure_code_profiles %}
+              <option value="{{code_profile}}">{{code_profile}}</option>
+              {% endfor %}
+            </select>
+            </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button id='btnSend' type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+ </div>
+  </div>
+  <!-- END cluster SETTINGS  -->
+    
+  <!-- Erasure code profiles  -->
+  <div 
+   {% if flag.name == 'erasure' %} 
+  class="tab-pane {{ flag.class1}} {{flag.class2}}" 
+  {% else %}
+  class="tab-pane fade"
+    {%endif%}
+   id="era" role="tabpanel" aria-labelledby="v-pills-erasure-tab">
+
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">NAME</th>
+      <th scope="col">TECHNIQUE</th>
+      <th scope="col">K</th>
+      <th scope="col">M</th>
+      <th scope="col">PLUGIN</th>
+      <th scope="col">COMMANDS</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for key, value in code_profiles.items %}
+    <tr>
+      <td>{{key}}</td>
+      <td>{{value.technique}}</td>
+      <td>{{value.k}}</td>
+      <td>{{value.m}}</td>
+      <td>{{value.plugin}}</td>
+      <td>
+         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#delErasureModal{{key}}">DELETE</button>
+      </td>
+   
+    </tr>
+      <!-- DEL ERASURE  -->
+    <div class="modal fade" id="delErasureModal{{key}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Del erasure</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h6>Are you sure you want to delete {{key}}?</h6>
+  
+ 
+
+      </div>
+      <div class="modal-footer">
+        <form action={% url 'delErasure' key %} method="POST">
+           {% csrf_token %}
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+        <!-- END DEL ERASURE  -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+  </tbody>
+</table>
+
+
+  <!-- ADD ERASURE -->
+ <div class="row">
+  <!-- ADD POOL BTN-->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addErasureModal">
+  Add New Erasure Code Profile
+</button>
+
+<!-- ADD ERASURE MODAL -->
+<div class="modal fade" id="addErasureModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add code profile</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- form -->
+        <form method="post" action="{% url 'addErasure' %}">
+              {% csrf_token %}
+            <div class="form-group">
+            <label for="var">Erasure name</label>
+            <input type="text" class="form-control" id="name" name="name" >
+            </div>
+            <div class="form-group">
+            <label for="var">Object chunks</label>
+            <input type="number" class="form-control" id="k" name="k">
+            </div>
+            <div class="form-group">
+            <label for="var">Coding chunks</label>
+            <input type="number" class="form-control" id="m" name="m">
+            </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button id='btnSend' type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+ </div>
+  </div>
+  <!-- END Erasure code profiles  -->
+    <!-- CRUSH MAP  -->
+    <!-- CRUSH MAP  -->
+ <div
+  {% if flag.name == 'crush' %} 
+  class="tab-pane {{ flag.class1}} {{flag.class2}}"
+    {% else %} 
+    class="tab-pane fade" 
+  {%endif%}
+  id="crush" role="tabpanel" aria-labelledby="v-pills-crush-tab">
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="tree-tab" data-toggle="tab" href="#tree" role="tab" aria-controls="tree" aria-selected="true">Tree</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="rules-tab" data-toggle="tab" href="#rules" role="tab" aria-controls="rules" aria-selected="false">Rules</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="tunables-tab" data-toggle="tab" href="#tunables" role="tab" aria-controls="tunables" aria-selected="false">Tunables</a>
+  </li>
+    <li class="nav-item">
+    <a class="nav-link" id="buckets-tab" data-toggle="tab" href="#buckets" role="tab" aria-controls="buckets" aria-selected="false">Buckets</a>
+  </li>
+     <li class="nav-item">
+    <a class="nav-link" id="types-tab" data-toggle="tab" href="#types" role="tab" aria-controls="types" aria-selected="false">Types</a>
+  </li>
+       <li class="nav-item">
+    <a class="nav-link" id="devices-tab" data-toggle="tab" href="#devices" role="tab" aria-controls="devices" aria-selected="false">Devices</a>
+  </li>
+
+</ul>
+<div class="tab-content" id="myTabContent">
+   <!-- CRUSH MAP  TREE -->
+  <div class="tab-pane fade show active" id="tree" role="tabpanel" aria-labelledby="home-tab">
+<div class="row">   
+<div class="col">
+    {% for tree in crushTree.output %}
+    <div class="row">
+
+  <div class="col-xs-12 col-md-2">
+    <button type="button" class="btn btn-primary btn-sm btn-block" disabled style="padding: 0px">{{tree.name}}</button>
+    
+  </div>
+  <div class="col-md-2">
+    
+  </div>
+  <div class="col-md-2">
+    
+  </div>
+    <div class="col-md-2">
+    
+  </div>
+      <div class="col-md-2">
+    
+  </div>
+</div>
+{% for item in tree.items %}
+<div class="row">
+  <div class="col-xs-12 col-md-2">
+  </div>
+  <div class="col-md-2">
+      <button type="button" 
+      {% if item.type == 'rack' %}
+            class="btn btn-success btn-sm btn-block" 
+      {% elif item.type == 'host' %}
+            class="btn btn-secondary btn-sm btn-block" 
+      {% elif item.type == 'chassis' %}
+            class="btn btn-danger btn-sm btn-block" 
+      {% elif item.type == 'osd' %}
+            class="btn btn-warning btn-sm btn-block" 
+      {% endif %}
+      style="padding: 0px" disabled>{{item.name}}</button>
+    
+  </div>
+  <div class="col-md-2">
+    
+  </div>
+    <div class="col-md-2">
+    
+  </div>
+      <div class="col-md-2">
+    
+  </div>
+</div>
+
+{% for x  in item.items%}
+<div class="row">
+  <div class="col-xs-12 col-md-2">
+    
+  </div>
+  <div class="col-md-2">
+    
+  </div>
+  <div class="col-md-2">
+        <button type="button" 
+      {% if x.type == 'rack' %}
+            class="btn btn-success btn-sm btn-block" 
+      {% elif x.type == 'host' %}
+            class="btn btn-secondary btn-sm btn-block" 
+      {% elif x.type == 'chassis' %}
+            class="btn btn-danger btn-sm btn-block" 
+      {% elif x.type == 'osd' %}
+            class="btn btn-warning btn-sm btn-block" 
+      {% endif %}
+      style="padding: 0px" disabled>{{x.name}}</button>
+  </div>
+    <div class="col-md-2">
+    
+  </div>
+      <div class="col-md-2">
+    
+  </div>
+</div>
+
+{% for y  in x.items%}
+{% if y.type != 'host' %}
+{% else %}
+<div class="row">
+  <div class="col-xs-12 col-md-2">
+    
+  </div>
+  <div class="col-md-2">
+    
+  </div>
+  <div class="col-md-2">
+
+  </div>
+    <div class="col-md-2">
+
+      <button type="button" 
+      {% if y.type == 'rack' %}
+            class="btn btn-success btn-sm btn-block" 
+      {% elif y.type == 'host' %}
+            class="btn btn-secondary btn-sm btn-block" 
+      {% elif y.type == 'chassis' %}
+            class="btn btn-danger btn-sm btn-block" 
+      {% elif y.type == 'osd' %}
+            class="btn btn-warning btn-sm btn-block" 
+      {% endif %}
+      style="padding: 0px" name='PRZED_OST' disabled>{{y.name}}</button>
+
+  </div>
+    <div class="col-md-2">
+
+  </div>
+</div>
+{% endif %}
+
+{% for z  in y.items%}
+{% if z.type != 'osd' %}
+{% else %}
+<div class="row">
+  <div class="col-xs-12 col-md-2">
+    
+  </div>
+  <div class="col-md-2">
+    
+  </div>
+  <div class="col-md-2">
+
+  </div>
+    <div class="col-md-2">
+
+  </div>
+    <div class="col-md-2">
+
+            <button type="button" 
+      {% if z.type == 'rack' %}
+            class="btn btn-success btn-sm btn-block" 
+      {% elif z.type == 'host' %}
+            class="btn btn-secondary btn-sm btn-block" 
+      {% elif z.type == 'chassis' %}
+            class="btn btn-danger btn-sm btn-block" 
+      {% elif z.type == 'osd' %}
+            class="btn btn-warning btn-sm btn-block" 
+      {% endif %}
+      style="padding: 0px" name="OST" disabled>{{z.name}}</button>
+     
+  </div>
+</div>
+ {% endif %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{%endfor%}
+</div>
+<div class="col">
+  <div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#CreateBucketModal">Create Bucket</button>
+  <!-- Create Bucket Modal -->
+<div class="modal fade" id="CreateBucketModal" tabindex="-1" role="dialog" aria-labelledby="CreateBucketModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create Bucket</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+            <form method="post" action="{% url 'addBucket' %}">
+              {% csrf_token %}
+              <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="root" value="root" onClick="Disable()" checked="checked">
+               <label class="form-check-label" for="inlineRadio1">root</label>
+            </div>
+                <div class="form-check form-check-inline" >
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="rack" value="rack"  onClick="EnableRack()">
+               <label class="form-check-label" for="inlineRadio1"">rack</label>
+            </div>
+              <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="chassis" value="chassis" onClick="EnableChasis()">
+               <label class="form-check-label" for="inlineRadio1" >chassis</label>
+            </div>
+            <div class="form-group">
+            <label for="name">Bucket name</label>
+            <input type="text" class="form-control" id="name" name="name">
+            </div>
+
+            <div class="form-group" id="group-rack" hidden>
+              <label for="exampleFormControlSelect1">Select root</label>
+            <select class="form-control" id="exampleFormControlSelect1" name="root">
+              {% for root in crushTree.output %}
+              <option value="{{root.name}}">{{root.name}}</option>
+              {% endfor %}
+            </select>
+            </div>
+
+            <div class="form-group" id="group-chasis" hidden>
+              <label for="exampleFormControlSelect2">Select rack</label>
+            <select class="form-control" id="exampleFormControlSelect2" name="rack">
+              {% for root in crushTree.output %}
+              {% for rack in root.items %}
+              {% if rack.type == 'rack' %}
+              <option value="{{rack.name}}">{{rack.name}}</option>
+              {% endif %}
+              {% endfor %}
+               {% endfor %}
+            </select>
+            </div>
+            </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- END Create Bucket Modal -->
+  <button type="button" class="btn btn-secondary" data-toggle="modal"  data-target="#MoveHostModal">Move Host</button>
+    <!-- Move Host Modal -->
+<div class="modal fade" id="MoveHostModal" tabindex="-1" role="dialog" aria-labelledby="MoveHostModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Move Host</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+              <form method="post" action="{% url 'moveHost' %}">
+              {% csrf_token %}
+
+            <div class="form-group" id="group-rack">
+              <label for="exampleFormControlSelect1">Select host</label>
+            <select class="form-control" id="exampleFormControlSelect1" name="host">
+
+              {% for host in cluster.output.crushmap.buckets %}
+              {% if host.type_name == 'host' %}
+              <option value="{{host.name}}">{{host.name}}</option>
+              {% endif %}
+              {% endfor %}
+
+            </select>
+            </div>
+
+            <div class="form-group" id="group-rack">
+              <label for="exampleFormControlSelect1">Select chassis</label>
+            <select class="form-control" id="exampleFormControlSelect1" name="chassis">
+
+              {% for host in cluster.output.crushmap.buckets %}
+              {% if host.type_name == 'chassis' %}
+              <option value="{{host.name}}">{{host.name}}</option>
+              {% endif %}
+              {% endfor %}
+              <option value="default">default</option>
+            </select>
+            </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- END Move Host Modal  -->
+  <button type="button" class="btn btn-secondary" data-toggle="modal"  data-target="#CreateCrushRuleModal">Create Crush Rule</button>
+      <!-- Create Crush Rule Modal -->
+<div class="modal fade" id="CreateCrushRuleModal" tabindex="-1" role="dialog" aria-labelledby="CreateCrushRuleModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create Crush Rule</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+                  <form method="post" action="{% url 'addCrushRule' %}">
+              {% csrf_token %}
+
+              <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="replicated" value="replicated" onClick="DisableErasured()" checked="checked">
+               <label class="form-check-label" for="inlineRadio1">simple</label>
+            </div>
+                <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="erasure" value="erasure"  onClick="DisableReplicated()">
+               <label class="form-check-label" for="inlineRadio1"">erasured</label>
+            </div>
+
+            <div class="form-group">
+            <label for="name">Rule name</label>
+            <input type="text" class="form-control" id="name" name="name">
+            </div>
+
+            <div class="form-group" id="group-r">
+              <label for="exampleFormControlSelect1">Select root</label>
+            <select class="form-control" id="exampleFormControlSelect1" name="root">
+              {% for root in crushTree.output %}
+              <option value="{{root.name}}">{{root.name}}</option>
+              {% endfor %}
+            </select>
+            </div>
+
+            <div class="form-group" id="group-pt">
+              <label for="exampleFormControlSelect2">Select placement type</label>
+            <select class="form-control" id="exampleFormControlSelect2" name="p_tye">
+            <option value="rack">rack</option>
+            <option value="chassis">chassis</option>
+            </select>
+            </div>
+
+            <div class="form-group" id="group-code-profile" hidden>
+              <label for="exampleFormControlSelect2">Code profile</label>
+            <select class="form-control" id="exampleFormControlSelect2" name="code_profile">
+              {% for erasure in cluster.output.osdmap.erasure_code_profiles %} 
+            <option value="{{erasure}}">{{erasure}}</option>
+             {% endfor %}
+            </select>
+            </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- END Create Crush Rule Modal  -->
+  <button type="button" class="btn btn-secondary" data-toggle="modal"  data-target="#DeleteBucketModal">Delete Bucket</button>
+        <!-- Delete Bucktet Modal -->
+<div class="modal fade" id="DeleteBucketModal" tabindex="-1" role="dialog" aria-labelledby="DeleteBucketModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Bucket</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+              <form method="post" action="{% url 'delBucket' %}">
+              {% csrf_token %}
+
+            <div class="form-group" id="group-rack">
+              <label for="exampleFormControlSelect1">Select bucket</label>
+            <select class="form-control" id="exampleFormControlSelect1" name="bucket">
+
+              {% for bucket in cluster.output.crushmap.buckets %}
+              {% if not bucket.items  %}
+              <option value="{{bucket.name}}">{{bucket.name}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+            </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- END Delete Bucktet Modal  -->
+  <button type="button" class="btn btn-secondary" data-toggle="modal"  data-target="#DeleteCrushRuleModal">Delete Crush Rule</button>
+          <!-- Delete Crush Rule Modal -->
+<div class="modal fade" id="DeleteCrushRuleModal" tabindex="-1" role="dialog" aria-labelledby="DeleteCrushRuleModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Crush Rule</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+              <form method="post" action="{% url 'delRule' %}">
+              {% csrf_token %}
+              {% if not cluster.output.crushmap.rules %}
+              <h4>No CRUSH Rules to delete.</h4>
+              {% else %}
+              <div class="form-group" id="group-rule">
+              <label for="exampleFormControlSelect1">Select rule</label>
+            <select class="form-control" id="exampleFormControlSelect1" name="rule">
+
+              {% for rule in cluster.output.crushmap.rules %}
+              
+              <option value="{{rule.rule_name}}">{{rule.rule_name}}</option>
+    
+              {% endfor %}
+            </select>
+            </div>
+            {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- END Delete Crush Rule Modal  -->
+</div>
+</div>
+</div>
+
+  </div>
+   <!-- END CRUSH MAP  TREE -->
+   <!-- CRUSH MAP  RULES -->
+  <div class="tab-pane fade" id="rules" role="tabpanel" aria-labelledby="profile-tab">
+    <div class="row">
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">NAME</th>
+      <th scope="col">TYPE</th>
+      <th scope="col">RULESET</th>
+      <th scope="col">MIN_SIZE</th>
+      <th scope="col">MAX_SIZE</th>
+      <th scope="col">STEPS</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rule in cluster.output.crushmap.rules %}
+    <tr>
+      <th scope="row">{{rule.rule_id}}</th>
+      <td>{{rule.rule_name}}</td>
+      <td>{{rule.type}}</td>
+      <td>{{rule.ruleset}}</td>
+      <td>{{rule.min_size}}</td>
+      <td>{{rule.max_size}}</td>
+      <td>
+      <ul class="list-group list-group-flush">
+        {% for step in rule.steps %}
+        <li class="list-group-item">{{step.op}}</li>
+        {% endfor %}
+      </ul>
+      </td>
+    </tr>
+      {% endfor %}
+  </tbody>
+</table>
+</div>
+  </div>
+   <!-- END CRUSH MAP  RULES -->
+   <!-- CRUSH MAP  TUNABLES -->
+  <div class="tab-pane fade" id="tunables" role="tabpanel" aria-labelledby="contact-tab">
+    <div class="row">
+    <ul class="list-unstyled">
+      {% for key, value in cluster.output.crushmap.tunables.items %}
+        <li><b>{{key}}:</b> {{value}}</li>
+      {% endfor %}
+    </ul>
+   </div>
+  </div>
+   <!-- END CRUSH MAP  TUNABLES -->
+   <!-- CRUSH MAP  BUCKETS -->
+  <div class="tab-pane fade" id="buckets" role="tabpanel" aria-labelledby="buckets-tab">
+    
+  <div class="row">
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">NAME</th>
+      <th scope="col">ALG</th>
+      <th scope="col">HASH</th>
+      <th scope="col">TYPE</th>
+      <th scope="col">WEIGHT</th>
+      <th scope="col">CHILDREN</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for bucket in cluster.output.crushmap.buckets %}
+    <tr>
+      <th scope="row">{{bucket.id}}</th>
+      <td>{{bucket.name}}</td>
+      <td>{{bucket.alg}}</td>
+      <td>{{bucket.hash}}</td>
+      <td>{{bucket.type_name}}</td>
+      <td>{{bucket.weight}}</td>
+      <td>
+      <ul class="list-group list-group-flush">
+        {% for child in bucket.items %}
+        <li class="list-group-item">{{child.id}}</li>
+        {% endfor %}
+      </ul>
+      </td>
+    </tr>
+      {% endfor %}
+  </tbody>
+</table>
+</div>
+
+  </div>
+
+   <!-- END CRUSH MAP  BUCKETS -->
+   <!-- CRUSH MAP  TYPES -->
+  <div class="tab-pane fade" id="types" role="tabpanel" aria-labelledby="types-tab">
+    
+    <div class="row">
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">NAME</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for type in cluster.output.crushmap.types %}
+    <tr>
+      <th scope="row">{{type.type_id}}</th>
+      <td>{{type.name}}</td>
+    </tr>
+      {% endfor %}
+  </tbody>
+</table>
+</div>
+
+  </div>
+   <!-- END CRUSH MAP  TYPES -->
+   <!-- CRUSH MAP  DEVICES -->
+  <div class="tab-pane fade" id="devices" role="tabpanel" aria-labelledby="devices-tab">
+    
+     <div class="row">
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">NAME</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for device in cluster.output.crushmap.devices %}
+    <tr>
+      <th scope="row">{{device.id}}</th>
+      <td>{{device.name}}</td>
+    </tr>
+      {% endfor %}
+  </tbody>
+</table>
+</div>
+
+  </div>
+   <!-- END CRUSH MAP  DEVICES -->
+</div>
+  </div>
+  <!-- END CRUSH MAP -->
+    <!-- END CRUSH MAP  -->
+  </div>
+</div>
+  </div>
+</div>
+</div>
+</body>
+</html>

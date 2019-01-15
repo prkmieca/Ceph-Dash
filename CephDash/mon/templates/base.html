@@ -1,0 +1,242 @@
+{% load staticfiles %}
+{% load filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "/css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "/css/CephDashStyle.css" %}" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <script src="{% static "js/jquery-3.3.1.min.js" %}"></script>
+    <script src="{% static "/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "/js/raphael-2.1.4.min.js" %}"></script>
+    <script src="{% static "/js/justgage.js" %}"></script>
+  <script src="{% static "/js/gage.js" %}"></script>
+
+
+</head>
+
+<body>
+  <!-- NAVBAR BEGIN -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">CLUSTER STATUS</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="/manage">Manage</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href={% url 'log_out'%}>Logout</a>
+      </li>
+
+    </ul>
+  </div>
+</nav>
+
+<!-- NAVBAR END -->
+
+<!-- CONTAINER BEGIN -->
+<!-- CONTAINER END -->
+
+<div class="container">
+
+
+<div class="row">
+  <!-- OVERALL HEALTH -->
+  <div class="col-4">
+    <div class="card">
+  <h5 class="card-header">Overall Health</h5>
+  <div class="card-body">
+    <div
+    {% if cluster_status.output.health.overall_status == 'HEALTH_OK' %} 
+    class="alert alert-success"
+    {% elif cluster_status.output.health.overall_status == 'HEALTH_WARN' %} 
+    class="alert alert-warning"
+    {% else %}
+    class="alert alert-danger"
+    {%endif%}
+    role="alert">
+    {{cluster_status.output.health.overall_status}}
+    </div>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#healthModal">
+  Detalis
+</button>
+  </div>
+
+<div class="modal fade" id="healthModal" tabindex="-1" role="dialog" aria-labelledby="healthModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Overall Health</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% for det in cluster_status.output.health.summary%}
+      <div 
+    {% if cluster_status.output.health.overall_status == 'HEALTH_OK' %} 
+    class="alert alert-success"
+    {% elif cluster_status.output.health.overall_status == 'HEALTH_WARN' %} 
+    class="alert alert-warning"
+    {% else %}
+    class="alert alert-danger"
+    {%endif%}
+    role="alert">
+      {{det.severity}}:
+       {{det.summary}}
+        </div>
+        {% endfor %}
+      </div>
+
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+  </div>
+  <!-- MON STATUS -->
+
+  <div class="col-8">
+        <div class="card">
+  <h5 class="card-header">Mon Status</h5>
+  <div class="card-body">
+
+         {% for mon in cluster_status.output.health.health.health_services.0.mons %}
+             <div
+              {% if mon.health == 'HEALTH_OK' %} 
+              class="alert alert-success"
+              {% elif mon.health == 'HEALTH_WARN' %} 
+              class="alert alert-warning"
+              {% else %}
+              class="alert alert-danger"
+              {%endif%}
+              role="alert">
+              {{mon.name}}
+              {{mon.health}}
+            </div>
+   
+      {% endfor %}
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="row">
+    <!-- OSD STATUS -->
+  <div class="col-12">
+    <div class="card">
+  <h5 class="card-header">Osd Status</h5>
+  <div class="card-body" style="padding-top: 0px">
+    <table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">All OSDs</th>
+      <th scope="col">UP OSDs</th>
+      <th scope="col">Unhealty OSDs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="table-secondary">{{cluster_status.output.osdmap.osdmap.num_osds}}</td>
+      <td class="table-success">{{cluster_status.output.osdmap.osdmap.num_up_osds}}</td>
+      <td class="table-danger">{{ cluster_status.output.osdmap.osdmap.num_osds|sub:cluster_status.output.osdmap.osdmap.num_up_osds }}</td>
+    </tr>
+  </tbody>
+</table>
+  
+    <span 
+    {% if cluster_status.output.osdmap.osdmap.full%}
+    class="badge badge-danger">
+    {% else %}
+    class="badge badge-secondary">
+    {% endif %}
+  Full: {{cluster_status.output.osdmap.osdmap.full}}</span><br/>
+
+    <span 
+    {% if cluster_status.output.osdmap.osdmap.nearfull%}
+    class="badge badge-danger">
+    {% else %}
+    class="badge badge-secondary">
+        {% endif %}
+    Nearfull: {{cluster_status.output.osdmap.osdmap.nearfull}}</span>
+  </div>
+</div>
+  </div>
+
+</div>
+
+<div class="row">
+    <!-- USAGE-->
+  <div class="col-12">
+    <div class="card">
+  <h5 class="card-header">Usage</h5>
+  <div class="card-body">
+    <h5 class="card-text">Data usage: {{cluster_status.output.pgmap.bytes_used|hbytes}}/{{cluster_status.output.pgmap.bytes_total|hbytes}}</h5> 
+
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" style="width: {{cluster_status.output.pgmap.bytes_used|usage:cluster_status.output.pgmap.bytes_total}}%;" aria-valuenow={{cluster_status.output.pgmap.bytes_used}} aria-valuemin="0" aria-valuemax= {{cluster_status.output.pgmap.bytes_total}} >{{cluster_status.output.pgmap.bytes_used|usage:cluster_status.output.pgmap.bytes_total}}%</div>
+    </div>
+  </div>
+
+</div>
+  </div>
+
+</div>
+
+
+<div class="row">
+    <!-- PG STATUS-->
+  <div class="col-12">
+    <div class="card">
+  <h5 class="card-header">PG Status</h5>
+  <div class="card-body" style="padding: 0px">
+
+<table class="table" style="padding: 0px">
+  <thead>
+    <tr>
+      <th scope="col">Count</th>
+      <th scope="col">State</th>
+      <th scope="col">Percentage</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for pg in  cluster_status.output.pgmap.pgs_by_state %}
+    <tr>
+      <td>{{pg.count}}</td>
+      <td>{{pg.state_name}} </td>
+      <td>{{pg.count|usage:cluster_status.output.pgmap.num_pgs}}%</td>
+    </tr>
+      {% endfor %}
+  </tbody>
+</table>
+  </div>
+</div>
+  </div>
+
+</div>
+
+</div>
+
+</body>
+</html>

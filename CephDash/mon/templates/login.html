@@ -1,0 +1,47 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "/css/bootstrap.min.css" %}" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <script src="{% static "js/jquery-3.3.1.min.js" %}"></script>
+    <script src="{% static "/js/bootstrap.min.js" %}"></script>
+
+
+</head>
+
+<body>
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+    </div>
+    <div class="col-sm" style="padding-top: 50px">
+     <form class="form-signin" action={% url 'passs' %} method="post">
+                {% csrf_token %}
+      <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+      <label for="input" class="sr-only">Login</label>
+      <input type="input" id="name" name="name" class="form-control" placeholder="Login" required autofocus>
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="pass" name="pass" class="form-control" placeholder="Password" required>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Log in</button>
+    </form>
+    </div>
+    <div class="col-sm">
+    </div>
+  </div>
+</div>
+  </body>
+</html>
